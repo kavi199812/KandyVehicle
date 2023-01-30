@@ -17,16 +17,18 @@ class CenterController1 extends Controller
      */
     public function index(Request $request)
     {
-
+        $center_id = auth('center')->id();
         $search = $request['search'] ?? "";
         if ($search != "") {
-
             $jobs = job::where('fault', 'LIKE', "%$search%")
                 ->orwhere('vehicle_name', 'LIKE', "%$search%")
+                ->where('center_id',$center_id)
+                ->where('is_submitted_offer',0)
                 ->get();
-
         } else {
             $jobs = Job::query()
+                ->where('center_id',$center_id)
+                ->where('is_submitted_offer',0)
                 ->get();
         }
 
@@ -57,11 +59,7 @@ class CenterController1 extends Controller
      */
     public function store(Request $request)
     {
-        $job = Job::query()
-            ->where('id',$request->input('job_id'))
-            ->get();
-        
-        dd($job);
+        $center_id = auth('center')->id();
         $request->validate([
             'email' => 'required',
             'cost' => 'required',
@@ -83,6 +81,14 @@ class CenterController1 extends Controller
             'fault' => $request->input('fault')
 
         ]);
+
+        $job_id = Job::query()
+            ->where('id',$request->input('job_id'))
+            ->where('center_id',$center_id)
+            ->value('id');
+
+        Job::where('id', $job_id)
+            ->update(['is_submitted_offer' => 1]);
 
         $job = Job::find($request->get('job_id'));
 

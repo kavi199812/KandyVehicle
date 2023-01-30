@@ -15,11 +15,6 @@ class jobController extends Controller
 
     public function index(Request $request)
     {
-       // $jobs = Job::query()
-        //    ->where('customer_id', auth('customer')->id())
-        //    ->get();
-        //return view("customer.jobs.index")->with(compact('jobs'));
-
         $search = $request['search'] ?? "";
         if ($search != ""){
 
@@ -36,13 +31,7 @@ class jobController extends Controller
         $data = compact('jobs','search');
         return view("customer.jobs.index")->with($data);
 
-
-
     }
-
-
-
-
 
     /**
      * Show the form for creating a new resource.
@@ -62,14 +51,19 @@ class jobController extends Controller
             'fault'=>'required',
         ]);
 
-        $job = Job::create([
-            'vehicle_name' => $request->input('vehicle_name'),
-            'vehicle_modal' => $request->input('vehicle_modal'),
-            'fault' => $request->input('fault'),
-            'customer_id' => auth('customer')->id()
-        ]);
+        $repair_centers = center::pluck('id');
 
-       // Notification::send(center::all(), new NewJobNotification($job));
+        foreach ($repair_centers as $r_center){
+            $job = Job::create([
+                'vehicle_name' => $request->input('vehicle_name'),
+                'vehicle_modal' => $request->input('vehicle_modal'),
+                'fault' => $request->input('fault'),
+                'customer_id' => auth('customer')->id(),
+                'center_id' => $r_center
+            ]);
+        }
+
+        Notification::send(center::all(), new NewJobNotification($job));
 
         return redirect()->route('customer.jobs.index')->with('status','Successfully added your job');
 

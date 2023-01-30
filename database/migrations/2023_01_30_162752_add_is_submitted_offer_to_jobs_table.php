@@ -13,8 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('offer_accepts', function (Blueprint $table) {
-            $table->foreignId('offer_price')->nullable()->constrained()->onDelete('No ACTION');
+        Schema::table('jobs', function (Blueprint $table) {
+            $table->boolean('is_submitted_offer')->default(0);
         });
     }
 
@@ -25,8 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('offer_accepts', function (Blueprint $table) {
-           $table->dropColumn('offer_price');
+        Schema::table('jobs', function (Blueprint $table) {
+            $table->dropColumn('center_id');
         });
     }
 };
